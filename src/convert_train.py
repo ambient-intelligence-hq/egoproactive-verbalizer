@@ -14,7 +14,14 @@ Frames are cached once per (video, interval) as jpgs (downscaled; the processor 
 """
 import argparse, json, os, sys
 
-sys.path.insert(0, os.environ.get("EGOPROACTIVE_STARTER_KIT", "starter_kit"))
+_KIT = os.environ.get("EGOPROACTIVE_STARTER_KIT", "starter_kit")
+if not os.path.isdir(_KIT):
+    raise SystemExit(
+        f"Organizer starter kit not found at {_KIT!r}.\n"
+        "Download it from the challenge page and point EGOPROACTIVE_STARTER_KIT at it:\n"
+        "  export EGOPROACTIVE_STARTER_KIT=/path/to/starter_kit"
+    )
+sys.path.insert(0, _KIT)
 from model import extract_frames                       # noqa: E402  (harness's own extractor)
 from run_generate_proactive import SYSTEM_PROMPT       # noqa: E402
 

@@ -73,15 +73,20 @@ it drives the [Ambient](https://github.com/ambient-intelligence-hq/ambient) vide
 ### 2. Frames
 
 ```bash
-python src/convert_train.py --videos data/videos --frames_root data/frames --max_frames 32
+python src/convert_train.py \
+  --rows data/mix_all.jsonl \
+  --out  data/train_chunks.jsonl \
+  --videos data/videos --frames_root data/frames \
+  --max_frames 32
 ```
 
-`--max_frames 32` is not optional — see Gotchas.
+`--max_frames 32` is not optional — see Gotchas. Frame extraction over long clips is slow;
+shard `--rows` across cores and concatenate the outputs (12-way took ~8 h down to ~40 min).
 
 ### 3. Train
 
 ```bash
-python src/train_verbalizer.py --data data/mix_all.jsonl --out runs/verbalizer_4b \
+python src/train_verbalizer.py --data data/train_chunks.jsonl --out runs/verbalizer_4b \
   --epochs 1 --rank 32 --alpha 64
 ```
 
@@ -122,6 +127,36 @@ sudo chown -R "$USER" merged_4b          # not optional - see Gotchas
 docker build -f submission/Containerfile -t proactive:v1 .
 bash starter_kit/validate_image.sh proactive:v1        # must be 12/12
 ```
+
+## Smoke test
+
+Verifies the training and evaluation path end to end in a few minutes on one GPU, before
+committing to a full run. Uses ~300 rows and a 32-row held-out set with no video overlap.
+
+```bash
+export VERB_MODEL=Qwen/Qwen3.5-2B                 # smaller backbone for the smoke test
+python src/train_verbalizer.py --data data/smoke_train.jsonl --out runs/smoke --epochs 1 --rank 16 --alpha 32
+python src/eval_from_frames.py  --adapter runs/smoke --samples data/smoke_eval.jsonl --out smoke.json
+```
+
+Expected: training loss falls to below ~1.0, and evaluation reports a **non-degenerate** operating
+point — interrupt precision and recall both strictly between 0 and 1. If the sweep reports
+`recall=1.000` at every threshold the model has collapsed to always-interrupt and something is
+wrong (most often too few steps, or missing dialogue history).
+
+For reference, our own run of exactly this: 297 train rows / 38 steps on Qwen3.5-2B gave
+G-mean 0.570, macro-F1 0.584 at tau=0.46 (P=0.833, R=0.312). A 32-row / 4-step run collapses to
+G-mean 0.000, macro-F1 0.333 — which is the degenerate baseline, not a bug.
+
+## Environment variables
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `EGOPROACTIVE_STARTER_KIT` | `starter_kit` | Path to the organizer starter kit (required) |
+| `VERB_MODEL` | `Qwen/Qwen3.5-4B` | Base model to fine-tune |
+| `VERB_REPORT_TO` | `none` | Set to `wandb` to log to Weights & Biases |
+| `EP_DATA` / `EP_OUT` | `data/train.jsonl` / `runs/verbalizer_lora` | Training defaults |
+| `EP_VIDEOS` / `EP_FRAMES` | `data/videos` / `data/frames` | Frame-extraction defaults |
 
 ## Gotchas
 

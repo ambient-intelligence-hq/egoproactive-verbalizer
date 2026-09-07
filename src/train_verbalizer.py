@@ -137,7 +137,7 @@ def main():
         num_train_epochs=a.epochs, learning_rate=1e-4, lr_scheduler_type="cosine",
         warmup_ratio=0.03, logging_steps=5, save_strategy="steps", save_steps=250,
         save_total_limit=3, bf16=True, gradient_checkpointing=True,
-        gradient_checkpointing_kwargs={"use_reentrant": False}, report_to="wandb",
+        gradient_checkpointing_kwargs={"use_reentrant": False}, report_to=os.environ.get("VERB_REPORT_TO", "none"),
         run_name=os.path.basename(a.out), dataset_kwargs={"skip_prepare_dataset": True},
         remove_unused_columns=False, max_length=None)
     trainer = DecisionTrainer(model=model, args=cfg, train_dataset=ds,

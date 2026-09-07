@@ -17,7 +17,14 @@ from PIL import Image
 from transformers import AutoProcessor, AutoModelForImageTextToText, BitsAndBytesConfig
 from peft import PeftModel
 
-sys.path.insert(0, os.environ.get("EGOPROACTIVE_STARTER_KIT", "starter_kit"))
+_KIT = os.environ.get("EGOPROACTIVE_STARTER_KIT", "starter_kit")
+if not os.path.isdir(_KIT):
+    raise SystemExit(
+        f"Organizer starter kit not found at {_KIT!r}.\n"
+        "Download it from the challenge page and point EGOPROACTIVE_STARTER_KIT at it:\n"
+        "  export EGOPROACTIVE_STARTER_KIT=/path/to/starter_kit"
+    )
+sys.path.insert(0, _KIT)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from run_evaluation import score_proactive        # noqa: E402
 from train_verbalizer import SYSTEM_PROMPT         # noqa: E402
