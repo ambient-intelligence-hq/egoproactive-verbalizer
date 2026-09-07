@@ -1,0 +1,11 @@
+FROM wai-base:v0
+RUN pip install --no-cache-dir transformers==5.13.1 \
+ && python -c "import transformers;print('tf',transformers.__version__)"
+COPY model_appendix_proactive.py /app/model_appendix_proactive.py
+COPY register_proactive.py /app/register_proactive.py
+COPY patch_maxframes.py /app/patch_maxframes.py
+COPY pruned_2b/ /models/proactive/
+RUN python /app/register_proactive.py /app/model.py /models/proactive \
+ && python /app/patch_maxframes.py /app/run_evaluation.py \
+ && python -c "import sys;sys.path.insert(0,'/app');import model;print('registry qwen ->',model.MODEL_REGISTRY['qwen'].__name__)"
+ENV TMPDIR=/dev/shm

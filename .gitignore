@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.venv/
+data/
+runs/
+merged_*/
+pruned_*/
+frames/
+*.jsonl
+*.safetensors
+results*.json
+extra_ids.json
+rare_ids.json

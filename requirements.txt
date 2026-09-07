@@ -1,0 +1,11 @@
+# Pinned to the versions the winning runs used.
+# trl >= 1.9 removes `warmup_ratio` from SFTConfig and will break training.
+torch>=2.4
+transformers==5.13.1
+trl==1.8.0
+peft==0.19.1
+accelerate
+safetensors
+pillow
+av
+numpy
