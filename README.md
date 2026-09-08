@@ -123,6 +123,10 @@ LoRA adapters (private; request access):
 | 4B large (1st place) | `ambient-intelligence-labs/egoproactive-4b-lora` |
 | 2B small (2nd place) | `ambient-intelligence-labs/egoproactive-2b-lora` |
 
+## Acknowledgments
+
+We thank the organizers of the [Wearable AI Workshop @ ECCV 2026](https://wearable-ai-workshop.github.io/) for the benchmark, the dataset, and the evaluation infrastructure , and for their responsiveness throughout the challenge.
+
 ## Citation
 
 The full method, ablations and negative results are in the tech report. If you use this work:
