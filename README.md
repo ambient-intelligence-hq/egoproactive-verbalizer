@@ -1,6 +1,6 @@
 # Proactive Egocentric Assistance with Visually Grounded Supervision
 
-Winning approach for the **EgoProactive** track of the [Wearable AI Challenge @ ECCV 2026](https://wearable-ai-workshop.github.io/) — 1st in the large division, 2nd in the ≤2B division.
+🏆 Winning approach for the **EgoProactive** track of the [Wearable AI Challenge @ ECCV 2026](https://wearable-ai-workshop.github.io/) — 1st in the large division, 2nd in the ≤2B division.
 
 | Division | Model | Params | Macro-F1 | Place |
 |---|---|---|---|---|
