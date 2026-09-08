@@ -1,5 +1,10 @@
 # Proactive Egocentric Assistance with Visually Grounded Supervision
 
+[![Hugging Face Collection](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Collection-FFD21E)](https://huggingface.co/collections/ambient-intelligence-labs/wearables-ai-workshop-eccv-2026)
+[![arXiv](https://img.shields.io/badge/arXiv-XXXX.XXXXX-B31B1B.svg)](https://arxiv.org/abs/XXXX.XXXXX)
+[![4B model](https://img.shields.io/badge/%F0%9F%A4%97%20Model-egoproactive--4b--lora-FFD21E)](https://huggingface.co/ambient-intelligence-labs/egoproactive-4b-lora)
+[![2B model](https://img.shields.io/badge/%F0%9F%A4%97%20Model-egoproactive--2b--lora-FFD21E)](https://huggingface.co/ambient-intelligence-labs/egoproactive-2b-lora)
+
 🏆 Winning approach for the **EgoProactive** track of the [Wearable AI Challenge @ ECCV 2026](https://wearable-ai-workshop.github.io/) — 1st in the large division, 2nd in the ≤2B division.
 
 | Division | Model | Params | Macro-F1 | Place |
