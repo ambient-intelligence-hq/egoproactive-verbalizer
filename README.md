@@ -22,26 +22,6 @@ Loss is cross-entropy on that single token only; everything else is masked. This
 macro-F1** over the generative formulation — more than every data and scale intervention combined.
 Utterances are templated at inference, because the metric never scores their content.
 
-## Repository layout
-
-```
-src/                     training and evaluation
-  convert_train.py         videos + annotations -> per-chunk training rows (+ frames)
-  train_verbalizer.py      LoRA fine-tune of the yes/no verbalizer
-  eval_from_frames.py      score an adapter, sweeping tau
-annotation/              synthetic supervision (see "Data" below)
-  annotate_full.py         resumable driver: runs the agent over a clip manifest
-  annotation_prompt.txt    the tuned "t3" placement policy
-submission/              the container submitted to the organizers
-  Containerfile            4B large-division image
-  Containerfile.2b         2B small-division image (expects a pruned model)
-  model_appendix_proactive.py   the submission model class
-  register_proactive.py    registers it under the allowed `qwen` model type
-  patch_maxframes.py       fixes the harness frame-count default (see Gotchas)
-  merge_in_container.py    merges the LoRA into the base model
-vocab_pruning/           getting a 2.2132B model under the 2B division limit
-```
-
 ## Setup
 
 ```bash
@@ -61,7 +41,7 @@ The training mix is the released validation videos **seen twice** plus a synthet
 agent-annotated clips (13,730 rows, 53% interrupt). Both row files are published:
 
 ```bash
-huggingface-cli download infinitylogesh/egoproactive-synth-annotations --repo-type dataset \
+huggingface-cli download ambient-intelligence-labs/egoproactive-synth-annotations --repo-type dataset \
   --include "val700_train.jsonl" "egoconv_dense_train.jsonl" --local-dir data/
 # mix = val700 rows x2 + the full egoconv set, shuffled  (see TRAINING_MIX.md in that repo)
 ```
@@ -119,35 +99,6 @@ python vocab_pruning/verify_prune.py  pruned_2b merged_2b     # must pass 4/4
 python vocab_pruning/count_params.py  pruned_2b               # must read < 2.0000 B
 ```
 
-### 6. Build the submission image
-
-```bash
-python submission/merge_in_container.py Qwen/Qwen3.5-4B runs/verbalizer_4b merged_4b
-sudo chown -R "$USER" merged_4b          # not optional - see Gotchas
-docker build -f submission/Containerfile -t proactive:v1 .
-bash starter_kit/validate_image.sh proactive:v1        # must be 12/12
-```
-
-## Smoke test
-
-Verifies the training and evaluation path end to end in a few minutes on one GPU, before
-committing to a full run. Uses ~300 rows and a 32-row held-out set with no video overlap.
-
-```bash
-export VERB_MODEL=Qwen/Qwen3.5-2B                 # smaller backbone for the smoke test
-python src/train_verbalizer.py --data data/smoke_train.jsonl --out runs/smoke --epochs 1 --rank 16 --alpha 32
-python src/eval_from_frames.py  --adapter runs/smoke --samples data/smoke_eval.jsonl --out smoke.json
-```
-
-Expected: training loss falls to below ~1.0, and evaluation reports a **non-degenerate** operating
-point — interrupt precision and recall both strictly between 0 and 1. If the sweep reports
-`recall=1.000` at every threshold the model has collapsed to always-interrupt and something is
-wrong (most often too few steps, or missing dialogue history).
-
-For reference, our own run of exactly this: 297 train rows / 38 steps on Qwen3.5-2B gave
-G-mean 0.570, macro-F1 0.584 at tau=0.46 (P=0.833, R=0.312). A 32-row / 4-step run collapses to
-G-mean 0.000, macro-F1 0.333 — which is the degenerate baseline, not a bug.
-
 ## Environment variables
 
 | Variable | Default | Purpose |
@@ -158,33 +109,14 @@ G-mean 0.000, macro-F1 0.333 — which is the degenerate baseline, not a bug.
 | `EP_DATA` / `EP_OUT` | `data/train.jsonl` / `runs/verbalizer_lora` | Training defaults |
 | `EP_VIDEOS` / `EP_FRAMES` | `data/videos` / `data/frames` | Frame-extraction defaults |
 
-## Gotchas
-
-These each cost us real accuracy or a wasted training run.
-
-1. **Frame count must match between training and serving.** The evaluation harness defaults to 100
-   frames per decision; the models are trained on 32. The mismatch costs 0.027 macro-F1.
-   `patch_maxframes.py` fixes the default at image build time. Do **not** additionally re-stride
-   inside the model class — double-striding scored 0.61 against 0.79.
-2. **`chown` after merging.** Merging as root leaves weights unreadable to the build step, which then
-   bakes **zero-byte tensors** into the image — and the organizers' 12-check validation still passes,
-   because it only asserts the model directory is non-empty.
-3. **Left-pad batched Qwen-VL training.** Right-padding corrupts M-RoPE and shifts the loss by ~0.09.
-   Batch size 1 sidesteps it.
-4. **Pinned versions matter.** `trl` 1.9.2 dropped `warmup_ratio`. Use the pins in `requirements.txt`.
-5. **Dialogue history is load-bearing.** Remove it and the model fires on every chunk — it has no way
-   to know it already spoke.
-6. **More synthetic data is not better.** A second corpus added on top displaced the good data at
-   equal compute and cost 0.042. Hold compute fixed when ablating.
-
 ## Weights
 
 LoRA adapters (private; request access):
 
 | Submission | Repo |
 |---|---|
-| 4B large (1st place) | `infinitylogesh/egoproactive-verbalizer-4b-val700-egoconv` |
-| 2B small (2nd place) | `infinitylogesh/egoproactive-verbalizer-2b-val700-egoconv` |
+| 4B large (1st place) | `ambient-intelligence-labs/egoproactive-4b-lora` |
+| 2B small (2nd place) | `ambient-intelligence-labs/egoproactive-2b-lora` |
 
 ## Citation
 
@@ -192,8 +124,7 @@ The full method, ablations and negative results are in the tech report. If you u
 
 ```bibtex
 @techreport{umapathi2026speak,
-  title  = {Speak or Stay Silent: A Single-Token Verbalizer and Agent-Generated
-            Supervision for Proactive Egocentric Assistance},
+  title  = {Ambient @ EgoProactive 2026 : Proactive Egocentric Assistance with Visually Grounded Supervision},
   author = {Umapathi, Logesh Kumar},
   year   = {2026},
   institution = {Team Ambient},
