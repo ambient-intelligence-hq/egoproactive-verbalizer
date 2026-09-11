@@ -1,7 +1,7 @@
 # Proactive Egocentric Assistance with Visually Grounded Supervision
 
 [![Hugging Face Collection](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Collection-FFD21E)](https://huggingface.co/collections/ambient-intelligence-labs/wearables-ai-workshop-eccv-2026)
-[![arXiv](https://img.shields.io/badge/arXiv-XXXX.XXXXX-B31B1B.svg)](https://arxiv.org/abs/XXXX.XXXXX)
+[![arXiv](https://img.shields.io/badge/arXiv-2609.07154-B31B1B.svg)](https://arxiv.org/abs/2609.07154)
 [![4B model](https://img.shields.io/badge/%F0%9F%A4%97%20Model-egoproactive--4b--lora-FFD21E)](https://huggingface.co/ambient-intelligence-labs/egoproactive-4b-lora)
 [![2B model](https://img.shields.io/badge/%F0%9F%A4%97%20Model-egoproactive--2b--lora-FFD21E)](https://huggingface.co/ambient-intelligence-labs/egoproactive-2b-lora)
 
